@@ -69,6 +69,8 @@ export class Intro implements Scene {
     private dust : Array<Dust>;
     private dustTimer : number;
 
+    private isAskedForSubmission: boolean;
+
 
     constructor(param : any, event : CoreEvent) {
 
@@ -86,6 +88,8 @@ export class Intro implements Scene {
 
         this.dust = new Array<Dust> ();
         this.dustTimer = 0;
+
+        this.isAskedForSubmission = false;
 
         if (this.phase == 0) {
 
@@ -201,13 +205,12 @@ export class Intro implements Scene {
 
 
     public redraw(canvas : Canvas) {
-
         let font = canvas.data.getBitmap("font");
 
         if (this.phase == 2) {
-
             canvas.drawText(font, "THE END",
-                canvas.width/2, canvas.height/2 - 8, 0, 0, true);
+            canvas.width/2, canvas.height/2 - 8, 0, 0, true);
+            this.submitScore();
             return;
         }
 
@@ -236,4 +239,38 @@ export class Intro implements Scene {
 
     public dispose = () : any => <any>null;
 
+    public submitScore() {
+    // Retrieve player info from storage
+    const savedName = localStorage.getItem('userName') || 'Anonymous';
+    const savedEmail = localStorage.getItem('userEmail') || 'No Email';
+
+    if (!this.isAskedForSubmission) {
+        this.isAskedForSubmission = true;
+        const wantsToSubmit = confirm(
+            `You have cleared all the stages!\n\nDo you want to submit your score?`
+        );
+
+        if (wantsToSubmit) {
+            const scoreData = {
+            name: savedName,
+            email: savedEmail,
+            score: 'Game Cleared.',
+            game: 'The Maze of Space Goblins'
+            };
+            
+            console.log("Submitting score:", scoreData);
+
+            // Send the data to your backend server
+            fetch('https://submitspaceglobinform-gksuylu43a-uc.a.run.app', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(scoreData),
+            })
+                .then(response => response.json())
+                .then(data => alert("Score submitted successfully!"))
+                .catch(error => alert("Could not submit score."));
+            }
+        }
+    
+    }
 }

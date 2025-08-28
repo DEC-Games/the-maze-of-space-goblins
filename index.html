@@ -9,6 +9,20 @@
 <body style="overflow: hidden; background-color: black; cursor: none;">
 
     <script src="js/main.js" type="module"></script>
+    <script>
+        // --- Add this block at the top ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('name');
+        const email = urlParams.get('email');
 
+        // If the parameters exist in the URL, store them
+        if (username) {
+        localStorage.setItem('userName', username);
+        }
+        if (email) {
+        localStorage.setItem('userEmail', email);
+        }
+        // --- End of new block ---
+    </script>
 </body>
 </html>

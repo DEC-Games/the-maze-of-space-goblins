@@ -54,6 +54,7 @@ export class Intro {
         this.movePhase = 0;
         this.dust = new Array();
         this.dustTimer = 0;
+        this.isAskedForSubmission = false;
         if (this.phase == 0) {
             event.transition.activate(false, 1 /* TransitionEffectType.Fade */, 1.0 / 30.0, null, [0, 0, 0], 4);
         }
@@ -129,6 +130,7 @@ export class Intro {
         let font = canvas.data.getBitmap("font");
         if (this.phase == 2) {
             canvas.drawText(font, "THE END", canvas.width / 2, canvas.height / 2 - 8, 0, 0, true);
+            this.submitScore();
             return;
         }
         canvas.clear();
@@ -141,6 +143,33 @@ export class Intro {
             this.textIndex < STORY[this.phase].length) {
             drawBox(canvas, 0, 27, 140, 64);
             canvas.drawText(font, STORY[this.phase][this.textIndex].substring(0, this.charIndex), 8, 66, 0, 2);
+        }
+    }
+    submitScore() {
+        // Retrieve player info from storage
+        const savedName = localStorage.getItem('userName') || 'Anonymous';
+        const savedEmail = localStorage.getItem('userEmail') || 'No Email';
+        if (!this.isAskedForSubmission) {
+            this.isAskedForSubmission = true;
+            const wantsToSubmit = confirm(`You have cleared all the stages!\n\nDo you want to submit your score?`);
+            if (wantsToSubmit) {
+                const scoreData = {
+                    name: savedName,
+                    email: savedEmail,
+                    score: 'Game Cleared.',
+                    game: 'The Maze of Space Goblins'
+                };
+                console.log("Submitting score:", scoreData);
+                // Send the data to your backend server
+                fetch('https://submitspaceglobinform-gksuylu43a-uc.a.run.app', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(scoreData),
+                })
+                    .then(response => response.json())
+                    .then(data => alert("Score submitted successfully!"))
+                    .catch(error => alert("Could not submit score."));
+            }
         }
     }
 }
